@@ -5,6 +5,77 @@ import plotly.express as px
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
+class DashboardData:
+    def generate_activities_data(self):
+        return pd.DataFrame({'Activity': ['Task 1', 'Task 2'], 'Status': ['Completed', 'In Progress']})
+    
+    def generate_billing_data(self):
+        return pd.DataFrame({'Invoice': ['INV001', 'INV002'], 'Amount': [1000, 1500]})
+    
+    def generate_customers_data(self):
+        return pd.DataFrame({'Customer Name': ['Alice', 'Bob'], 'Purchase Amount': [200, 300]})
+    
+    def generate_vendors_data(self):
+        return pd.DataFrame({'Vendor Name': ['Vendor A', 'Vendor B'], 'Order Count': [5, 7]})
+    
+    def generate_payroll_data(self):
+        return pd.DataFrame({'Employee': ['John', 'Sarah'], 'Salary': [50000, 60000]})
+    
+    def generate_financial_data(self):
+        return pd.DataFrame({'Metric': ['Revenue', 'Expenses'], 'Value': [120000, 90000]})
+
+class DashboardLayouts:
+    def render_activities_tab(self, data):
+        st.title("Activities Overview")
+        st.dataframe(data)
+
+    def render_billing_tab(self, data):
+        st.title("Billing Overview")
+        st.dataframe(data)
+
+    def render_customers_tab(self, data):
+        st.title("Customers Overview")
+        st.dataframe(data)
+
+    def render_vendors_tab(self, data):
+        st.title("Vendors Overview")
+        st.dataframe(data)
+
+    def render_payroll_tab(self, data):
+        st.title("Payroll Overview")
+        st.dataframe(data)
+
+    def render_financial_tab(self, data):
+        st.title("Financial Overview")
+        st.dataframe(data)
+
+    def render_reports_tab(self, data):
+        st.title("Reports Overview")
+        for category, df in data['reports'].items():
+            st.subheader(category)
+            st.dataframe(df)
+
+    def render_analytics_tab(self, data):
+        st.title("Analytics Overview")
+        st.subheader("Key Performance Indicators (KPIs)")
+        for kpi, values in data['kpis'].items():
+            st.metric(label=kpi, value=values['current'], delta=values['delta'])
+        
+        st.subheader("Metrics")
+        selected_metric = st.selectbox("Select Metric", options=data['available_metrics'])
+        st.line_chart(data['metric_data'][selected_metric])
+
+    def render_documents_tab(self, data):
+        st.title("Documents Overview")
+        st.metric("Total Documents", data['total_documents'])
+        st.metric("Recent Uploads", data['recent_uploads'])
+        st.metric("Pending Review", data['pending_review'])
+        st.dataframe(data['document_list'])
+
+    def render_setup_tab(self):
+        st.title("Setup and Configuration")
+        st.write("Configure your dashboard settings here.")
+
 class DashboardApp:
     def __init__(self):
         self.data = DashboardData()
@@ -18,8 +89,8 @@ class DashboardApp:
         
         # Create main navigation
         tab_names = ["Activities", "Billing", "Customers", "Vendors", 
-                    "Payroll and HR", "Financial", "Reports", "Analytics", 
-                    "Documents", "Setup"]
+                     "Payroll and HR", "Financial", "Reports", "Analytics", 
+                     "Documents", "Setup"]
         tabs = st.tabs(tab_names)
         
         # Render each tab with its corresponding data and layout
