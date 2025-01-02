@@ -1,215 +1,172 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
-import plotly.express as px
 import numpy as np
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
-# Generate sample data
-def generate_financial_data():
-    dates = pd.date_range(start='2024-01-01', periods=12, freq='M')
-    return pd.DataFrame({
-        'Date': dates,
-        'Revenue': np.random.uniform(800000, 1200000, 12),
-        'Expenses': np.random.uniform(600000, 900000, 12),
-        'Profit': np.random.uniform(200000, 400000, 12),
-        'Assets': np.random.uniform(2000000, 2500000, 12),
-        'Liabilities': np.random.uniform(1000000, 1500000, 12),
-        'Equity': np.random.uniform(500000, 1000000, 12)
-    })
-
-def create_balance_sheet_view():
-    st.header("Balance Sheet")
-    
-    # Create sample balance sheet data
-    assets = {
-        'Current Assets': 1200000,
-        'Fixed Assets': 800000,
-        'Other Assets': 300000
-    }
-    
-    liabilities = {
-        'Current Liabilities': 600000,
-        'Long-term Liabilities': 900000
-    }
-    
-    equity = {
-        'Common Stock': 400000,
-        'Retained Earnings': 400000
-    }
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.subheader("Assets")
-        for key, value in assets.items():
-            st.metric(key, f"${value:,.2f}")
-        st.metric("Total Assets", f"${sum(assets.values()):,.2f}")
+class DashboardApp:
+    def __init__(self):
+        self.data = DashboardData()
+        self.layouts = DashboardLayouts()
         
-    with col2:
-        st.subheader("Liabilities & Equity")
-        for key, value in liabilities.items():
-            st.metric(key, f"${value:,.2f}")
-        st.metric("Total Liabilities", f"${sum(liabilities.values()):,.2f}")
-        st.divider()
-        for key, value in equity.items():
-            st.metric(key, f"${value:,.2f}")
-        st.metric("Total Equity", f"${sum(equity.values()):,.2f}")
-
-def create_trial_balance_view():
-    st.header("Trial Balance")
-    
-    # Create sample trial balance data
-    accounts = pd.DataFrame({
-        'Account': ['Cash', 'Accounts Receivable', 'Inventory', 'Equipment', 
-                   'Accounts Payable', 'Notes Payable', 'Common Stock', 'Revenue', 'Expenses'],
-        'Debit': [50000, 30000, 45000, 75000, 0, 0, 0, 0, 35000],
-        'Credit': [0, 0, 0, 0, 25000, 40000, 100000, 70000, 0]
-    })
-    
-    st.dataframe(accounts, use_container_width=True)
-    
-    total_debits = accounts['Debit'].sum()
-    total_credits = accounts['Credit'].sum()
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        st.metric("Total Debits", f"${total_debits:,.2f}")
-    with col2:
-        st.metric("Total Credits", f"${total_credits:,.2f}")
-
-def create_income_statement_view():
-    st.header("Income Statement")
-    
-    data = generate_financial_data()
-    
-    # Create monthly income statement
-    fig = go.Figure()
-    
-    fig.add_trace(go.Bar(
-        x=data['Date'],
-        y=data['Revenue'],
-        name='Revenue',
-        marker_color='green'
-    ))
-    
-    fig.add_trace(go.Bar(
-        x=data['Date'],
-        y=data['Expenses'],
-        name='Expenses',
-        marker_color='red'
-    ))
-    
-    fig.add_trace(go.Scatter(
-        x=data['Date'],
-        y=data['Profit'],
-        name='Profit',
-        line=dict(color='blue', width=2)
-    ))
-    
-    fig.update_layout(
-        title='Monthly Income Statement',
-        barmode='group',
-        xaxis_title='Month',
-        yaxis_title='Amount ($)',
-        height=500
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-
-def create_budget_vs_actual_view():
-    st.header("Budget vs Actual")
-    
-    # Create sample budget vs actual data
-    categories = ['Revenue', 'Operating Expenses', 'Marketing', 'R&D', 'Admin']
-    budget = np.random.uniform(500000, 1000000, len(categories))
-    actual = np.random.uniform(400000, 1100000, len(categories))
-    variance = actual - budget
-    variance_pct = (variance / budget) * 100
-    
-    data = pd.DataFrame({
-        'Category': categories,
-        'Budget': budget,
-        'Actual': actual,
-        'Variance': variance,
-        'Variance %': variance_pct
-    })
-    
-    # Create visualization
-    fig = go.Figure()
-    
-    fig.add_trace(go.Bar(
-        name='Budget',
-        x=categories,
-        y=budget,
-        marker_color='rgb(55, 83, 109)'
-    ))
-    
-    fig.add_trace(go.Bar(
-        name='Actual',
-        x=categories,
-        y=actual,
-        marker_color='rgb(26, 118, 255)'
-    ))
-    
-    fig.update_layout(
-        title='Budget vs Actual Comparison',
-        barmode='group',
-        height=500
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    
-    st.dataframe(
-        data.style.format({
-            'Budget': '${:,.2f}',
-            'Actual': '${:,.2f}',
-            'Variance': '${:,.2f}',
-            'Variance %': '{:.1f}%'
-        }),
-        use_container_width=True
-    )
-
-def main():
-    st.set_page_config(layout="wide", page_title="NetSuite Dashboard", page_icon="📊")
-    
-    # Top navigation bar with tabs
-    tab_names = ["Activities", "Billing", "Customers", "Vendors", "Payroll and HR", 
-                 "Financial", "Reports", "Analytics", "Documents", "Setup"]
-    tabs = st.tabs(tab_names)
-    
-    # Financial Tab Content
-    with tabs[5]:  # Financial tab
-        st.title("Financial Dashboard")
+    def run(self):
+        st.set_page_config(layout="wide", page_title="NetSuite Dashboard", page_icon="📊")
         
-        # Create tiles as buttons in the first row
-        col1, col2, col3, col4 = st.columns(4)
+        # Create sidebar for global filters
+        self.create_sidebar()
         
-        with col1:
-            if st.button("Balance Sheet", use_container_width=True):
-                create_balance_sheet_view()
-                
-        with col2:
-            if st.button("Trial Balance", use_container_width=True):
-                create_trial_balance_view()
-                
-        with col3:
-            if st.button("Income Statement", use_container_width=True):
-                create_income_statement_view()
-                
-        with col4:
-            if st.button("Budget vs Actual", use_container_width=True):
-                create_budget_vs_actual_view()
+        # Create main navigation
+        tab_names = ["Activities", "Billing", "Customers", "Vendors", 
+                    "Payroll and HR", "Financial", "Reports", "Analytics", 
+                    "Documents", "Setup"]
+        tabs = st.tabs(tab_names)
         
-        # Default view - show all
-        st.divider()
-        create_balance_sheet_view()
-        st.divider()
-        create_trial_balance_view()
-        st.divider()
-        create_income_statement_view()
-        st.divider()
-        create_budget_vs_actual_view()
+        # Render each tab with its corresponding data and layout
+        with tabs[0]:  # Activities
+            self.layouts.render_activities_tab(self.data.generate_activities_data())
+            
+        with tabs[1]:  # Billing
+            self.layouts.render_billing_tab(self.data.generate_billing_data())
+            
+        with tabs[2]:  # Customers
+            self.layouts.render_customers_tab(self.data.generate_customers_data())
+            
+        with tabs[3]:  # Vendors
+            self.layouts.render_vendors_tab(self.data.generate_vendors_data())
+            
+        with tabs[4]:  # Payroll and HR
+            self.layouts.render_payroll_tab(self.data.generate_payroll_data())
+            
+        with tabs[5]:  # Financial
+            self.layouts.render_financial_tab(self.data.generate_financial_data())
+            
+        with tabs[6]:  # Reports
+            self.layouts.render_reports_tab(self.generate_reports_data())
+            
+        with tabs[7]:  # Analytics
+            self.layouts.render_analytics_tab(self.generate_analytics_data())
+            
+        with tabs[8]:  # Documents
+            self.layouts.render_documents_tab(self.generate_documents_data())
+            
+        with tabs[9]:  # Setup
+            self.layouts.render_setup_tab()
+
+    def create_sidebar(self):
+        with st.sidebar:
+            st.title("Filters")
+            
+            # Date Range Filter
+            st.date_input(
+                "Date Range",
+                value=(datetime.now() - timedelta(days=30), datetime.now())
+            )
+            
+            # Company Filter
+            st.selectbox(
+                "Company",
+                options=["All"] + [f"Company {i}" for i in range(1, 6)]
+            )
+            
+            # Department Filter
+            st.multiselect(
+                "Department",
+                options=["Sales", "Marketing", "Finance", "Operations", "IT"]
+            )
+            
+            # Refresh Button
+            if st.button("Refresh Data"):
+                st.rerun()
+
+    def generate_reports_data(self):
+        # Generate sample reports data
+        reports = {
+            'Financial Reports': pd.DataFrame({
+                'Report Name': ['Balance Sheet', 'Income Statement', 'Cash Flow', 'Trial Balance'],
+                'Last Run': pd.date_range(end=datetime.now(), periods=4),
+                'Status': ['Completed', 'Completed', 'In Progress', 'Scheduled']
+            }),
+            'Sales Reports': pd.DataFrame({
+                'Report Name': ['Sales by Region', 'Product Performance', 'Customer Analysis'],
+                'Last Run': pd.date_range(end=datetime.now(), periods=3),
+                'Status': ['Completed', 'Completed', 'Completed']
+            }),
+            'Inventory Reports': pd.DataFrame({
+                'Report Name': ['Stock Level', 'Reorder Points', 'Inventory Valuation'],
+                'Last Run': pd.date_range(end=datetime.now(), periods=3),
+                'Status': ['Completed', 'In Progress', 'Completed']
+            }),
+            'Custom Reports': pd.DataFrame({
+                'Report Name': ['Custom Report 1', 'Custom Report 2'],
+                'Last Run': pd.date_range(end=datetime.now(), periods=2),
+                'Status': ['Completed', 'Draft']
+            })
+        }
+        return {'reports': reports}
+
+    def generate_analytics_data(self):
+        # Generate sample analytics data
+        dates = pd.date_range(start='2024-01-01', end='2024-12-31', freq='D')
+        
+        kpis = {
+            'Revenue Growth': {
+                'current': '15.2%',
+                'delta': '2.3%'
+            },
+            'Customer Satisfaction': {
+                'current': '4.5/5',
+                'delta': '0.2'
+            },
+            'Operating Margin': {
+                'current': '28.5%',
+                'delta': '-1.2%'
+            },
+            'Employee Retention': {
+                'current': '94.5%',
+                'delta': '1.5%'
+            }
+        }
+        
+        metrics = {
+            'Revenue': pd.DataFrame({
+                'date': dates,
+                'value': np.random.uniform(800000, 1200000, len(dates))
+            }),
+            'Customer Count': pd.DataFrame({
+                'date': dates,
+                'value': np.cumsum(np.random.randint(1, 10, len(dates)))
+            }),
+            'Average Order Value': pd.DataFrame({
+                'date': dates,
+                'value': np.random.uniform(100, 500, len(dates))
+            })
+        }
+        
+        return {
+            'kpis': kpis,
+            'available_metrics': list(metrics.keys()),
+            'metric_data': metrics
+        }
+
+    def generate_documents_data(self):
+        # Generate sample documents data
+        num_docs = 100
+        documents = pd.DataFrame({
+            'Document Name': [f'Document {i}' for i in range(num_docs)],
+            'Type': np.random.choice(['Invoice', 'Contract', 'Report', 'Policy'], num_docs),
+            'Created Date': pd.date_range(end=datetime.now(), periods=num_docs),
+            'Status': np.random.choice(['Draft', 'Under Review', 'Approved'], num_docs),
+            'Owner': np.random.choice(['John D.', 'Sarah M.', 'Mike R.'], num_docs)
+        })
+        
+        return {
+            'total_documents': len(documents),
+            'recent_uploads': len(documents[documents['Created Date'].dt.date == datetime.now().date()]),
+            'pending_review': len(documents[documents['Status'] == 'Under Review']),
+            'document_list': documents
+        }
 
 if __name__ == "__main__":
-    main()
+    app = DashboardApp()
+    app.run()
