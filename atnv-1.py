@@ -1,99 +1,215 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-from datetime import datetime
+import plotly.express as px
+import numpy as np
+from datetime import datetime, timedelta
 
-def create_gauge_chart():
-    fig = go.Figure(go.Indicator(
-        mode = "gauge+number",
-        value = 3.7,
-        title = {'text': "Revenue"},
-        number={'prefix': "$", 'suffix': "M"},
-        gauge = {
-            'axis': {'range': [None, 5]},
-            'bar': {'color': "darkblue"},
-            'steps': [
-                {'range': [0, 5], 'color': "lightgray"}
-            ],
-        }
+# Generate sample data
+def generate_financial_data():
+    dates = pd.date_range(start='2024-01-01', periods=12, freq='M')
+    return pd.DataFrame({
+        'Date': dates,
+        'Revenue': np.random.uniform(800000, 1200000, 12),
+        'Expenses': np.random.uniform(600000, 900000, 12),
+        'Profit': np.random.uniform(200000, 400000, 12),
+        'Assets': np.random.uniform(2000000, 2500000, 12),
+        'Liabilities': np.random.uniform(1000000, 1500000, 12),
+        'Equity': np.random.uniform(500000, 1000000, 12)
+    })
+
+def create_balance_sheet_view():
+    st.header("Balance Sheet")
+    
+    # Create sample balance sheet data
+    assets = {
+        'Current Assets': 1200000,
+        'Fixed Assets': 800000,
+        'Other Assets': 300000
+    }
+    
+    liabilities = {
+        'Current Liabilities': 600000,
+        'Long-term Liabilities': 900000
+    }
+    
+    equity = {
+        'Common Stock': 400000,
+        'Retained Earnings': 400000
+    }
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Assets")
+        for key, value in assets.items():
+            st.metric(key, f"${value:,.2f}")
+        st.metric("Total Assets", f"${sum(assets.values()):,.2f}")
+        
+    with col2:
+        st.subheader("Liabilities & Equity")
+        for key, value in liabilities.items():
+            st.metric(key, f"${value:,.2f}")
+        st.metric("Total Liabilities", f"${sum(liabilities.values()):,.2f}")
+        st.divider()
+        for key, value in equity.items():
+            st.metric(key, f"${value:,.2f}")
+        st.metric("Total Equity", f"${sum(equity.values()):,.2f}")
+
+def create_trial_balance_view():
+    st.header("Trial Balance")
+    
+    # Create sample trial balance data
+    accounts = pd.DataFrame({
+        'Account': ['Cash', 'Accounts Receivable', 'Inventory', 'Equipment', 
+                   'Accounts Payable', 'Notes Payable', 'Common Stock', 'Revenue', 'Expenses'],
+        'Debit': [50000, 30000, 45000, 75000, 0, 0, 0, 0, 35000],
+        'Credit': [0, 0, 0, 0, 25000, 40000, 100000, 70000, 0]
+    })
+    
+    st.dataframe(accounts, use_container_width=True)
+    
+    total_debits = accounts['Debit'].sum()
+    total_credits = accounts['Credit'].sum()
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Total Debits", f"${total_debits:,.2f}")
+    with col2:
+        st.metric("Total Credits", f"${total_credits:,.2f}")
+
+def create_income_statement_view():
+    st.header("Income Statement")
+    
+    data = generate_financial_data()
+    
+    # Create monthly income statement
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        x=data['Date'],
+        y=data['Revenue'],
+        name='Revenue',
+        marker_color='green'
     ))
-    fig.update_layout(height=200)
-    return fig
+    
+    fig.add_trace(go.Bar(
+        x=data['Date'],
+        y=data['Expenses'],
+        name='Expenses',
+        marker_color='red'
+    ))
+    
+    fig.add_trace(go.Scatter(
+        x=data['Date'],
+        y=data['Profit'],
+        name='Profit',
+        line=dict(color='blue', width=2)
+    ))
+    
+    fig.update_layout(
+        title='Monthly Income Statement',
+        barmode='group',
+        xaxis_title='Month',
+        yaxis_title='Amount ($)',
+        height=500
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+
+def create_budget_vs_actual_view():
+    st.header("Budget vs Actual")
+    
+    # Create sample budget vs actual data
+    categories = ['Revenue', 'Operating Expenses', 'Marketing', 'R&D', 'Admin']
+    budget = np.random.uniform(500000, 1000000, len(categories))
+    actual = np.random.uniform(400000, 1100000, len(categories))
+    variance = actual - budget
+    variance_pct = (variance / budget) * 100
+    
+    data = pd.DataFrame({
+        'Category': categories,
+        'Budget': budget,
+        'Actual': actual,
+        'Variance': variance,
+        'Variance %': variance_pct
+    })
+    
+    # Create visualization
+    fig = go.Figure()
+    
+    fig.add_trace(go.Bar(
+        name='Budget',
+        x=categories,
+        y=budget,
+        marker_color='rgb(55, 83, 109)'
+    ))
+    
+    fig.add_trace(go.Bar(
+        name='Actual',
+        x=categories,
+        y=actual,
+        marker_color='rgb(26, 118, 255)'
+    ))
+    
+    fig.update_layout(
+        title='Budget vs Actual Comparison',
+        barmode='group',
+        height=500
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    st.dataframe(
+        data.style.format({
+            'Budget': '${:,.2f}',
+            'Actual': '${:,.2f}',
+            'Variance': '${:,.2f}',
+            'Variance %': '{:.1f}%'
+        }),
+        use_container_width=True
+    )
 
 def main():
-    # Page configuration
-    st.set_page_config(layout="wide", page_title="NetSuite Dashboard")
+    st.set_page_config(layout="wide", page_title="NetSuite Dashboard", page_icon="📊")
     
-    # Top navigation bar
-    col1, col2, col3, col4 = st.columns([2, 6, 1, 1])
-    with col1:
-        st.image("https://via.placeholder.com/150x50", caption="")  # Logo placeholder
-    with col2:
-        tabs = ["Activities", "Billing", "Customers", "Vendors", "Payroll and HR", 
-                "Financial", "Reports", "Analytics", "Documents", "Setup"]
-        st.selectbox("Navigation", tabs, label_visibility="collapsed")
-    with col3:
-        st.button("Help")
-    with col4:
-        st.button("Feedback")
-
-    # Main content area
-    left_col, middle_col, right_col = st.columns([1, 2, 1])
-
-    # Left sidebar
-    with left_col:
-        st.markdown("### Reminders")
-        reminders = [
-            "📊 Expense Reports to Approve",
-            "📝 Purchase Request to Approve",
-            "❗ Invoices > 30 Days > $5K",
-            "👥 New Customers"
-        ]
-        for reminder in reminders:
-            st.markdown(reminder)
+    # Top navigation bar with tabs
+    tab_names = ["Activities", "Billing", "Customers", "Vendors", "Payroll and HR", 
+                 "Financial", "Reports", "Analytics", "Documents", "Setup"]
+    tabs = st.tabs(tab_names)
+    
+    # Financial Tab Content
+    with tabs[5]:  # Financial tab
+        st.title("Financial Dashboard")
         
-        st.markdown("### Navigation Shortcut Group")
-        shortcuts = [
-            "Executive Management",
-            "Sales",
-            "Customer Hierarchy",
-            "Inventory Management"
-        ]
-        for shortcut in shortcuts:
-            st.button(shortcut)
-
-    # Middle section
-    with middle_col:
-        st.markdown("### Tiles")
-        tile_cols = st.columns(4)
-        tiles = ["Balance Sheet", "Trial Balance", "Income Statement", "Budget vs Actual"]
-        for i, tile in enumerate(tiles):
-            with tile_cols[i]:
-                st.button(tile)
+        # Create tiles as buttons in the first row
+        col1, col2, col3, col4 = st.columns(4)
         
-        st.markdown("### Key Performance Indicators")
-        kpi_cols = st.columns(4)
-        kpis = ["Sales", "Expenses", "Revenue", "Receivables"]
-        for i, kpi in enumerate(kpis):
-            with kpi_cols[i]:
-                st.metric(
-                    label=kpi,
-                    value=f"${round(float(1000000 + i*500000)/1000000, 1)}M",
-                    delta=f"{5 + i}%"
-                )
-
-    # Right column
-    with right_col:
-        st.markdown("### KPI Meter")
-        st.plotly_chart(create_gauge_chart(), use_container_width=True)
+        with col1:
+            if st.button("Balance Sheet", use_container_width=True):
+                create_balance_sheet_view()
+                
+        with col2:
+            if st.button("Trial Balance", use_container_width=True):
+                create_trial_balance_view()
+                
+        with col3:
+            if st.button("Income Statement", use_container_width=True):
+                create_income_statement_view()
+                
+        with col4:
+            if st.button("Budget vs Actual", use_container_width=True):
+                create_budget_vs_actual_view()
         
-        st.markdown("### Revenue by Period Trend")
-        # Create a simple line chart for revenue trend
-        chart_data = pd.DataFrame({
-            'Period': pd.date_range(start='2024-01-01', periods=6, freq='M'),
-            'Revenue': [3.2, 3.4, 3.5, 3.7, 3.8, 3.9]
-        })
-        st.line_chart(chart_data.set_index('Period'))
+        # Default view - show all
+        st.divider()
+        create_balance_sheet_view()
+        st.divider()
+        create_trial_balance_view()
+        st.divider()
+        create_income_statement_view()
+        st.divider()
+        create_budget_vs_actual_view()
 
 if __name__ == "__main__":
     main()
