@@ -1,8 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
 class DashboardData:
@@ -23,106 +21,6 @@ class DashboardData:
 
     def generate_financial_data(self):
         return {}
-
-class DashboardLayouts:
-    def render_activities_tab(self, data):
-        st.write("Activities tab content.")
-
-    def render_billing_tab(self, data):
-        st.write("Billing tab content.")
-
-    def render_customers_tab(self, data):
-        st.write("Customers tab content.")
-
-    def render_vendors_tab(self, data):
-        st.write("Vendors tab content.")
-
-    def render_payroll_tab(self, data):
-        st.write("Payroll and HR tab content.")
-
-    def render_financial_tab(self, data):
-        st.write("Financial tab content.")
-
-    def render_reports_tab(self, data):
-        st.write("Reports tab content.")
-
-    def render_analytics_tab(self, data):
-        st.title("Analytics Overview")
-        st.subheader("Key Performance Indicators (KPIs)")
-        for kpi, values in data['kpis'].items():
-            st.metric(label=kpi, value=values['current'], delta=values['delta'])
-
-        st.subheader("Metrics")
-        selected_metric = st.selectbox("Select Metric", options=data['available_metrics'])
-
-        # Ensure the DataFrame is structured correctly
-        metric_data = data['metric_data'][selected_metric]
-        if not all(col in metric_data.columns for col in ['date', 'value']):
-            st.error(f"Data for {selected_metric} is not in the expected format.")
-            return
-
-        # Rename columns to ensure compatibility with line_chart
-        metric_data = metric_data.rename(columns={'date': 'x', 'value': 'y'})
-        st.line_chart(metric_data.set_index('x')['y'])
-
-    def render_documents_tab(self, data):
-        st.write("Documents tab content.")
-
-    def render_setup_tab(self):
-        st.write("Setup tab content.")
-
-class DashboardApp:
-    def __init__(self):
-        self.data = DashboardData()
-        self.layouts = DashboardLayouts()
-
-    def run(self):
-        st.set_page_config(layout="wide", page_title="NetSuite Dashboard", page_icon="📊")
-        self.create_sidebar()
-
-        tab_names = ["Activities", "Billing", "Customers", "Vendors", 
-                     "Payroll and HR", "Financial", "Reports", "Analytics", 
-                     "Documents", "Setup"]
-        tabs = st.tabs(tab_names)
-
-        with tabs[0]:
-            self.layouts.render_activities_tab(self.data.generate_activities_data())
-        with tabs[1]:
-            self.layouts.render_billing_tab(self.data.generate_billing_data())
-        with tabs[2]:
-            self.layouts.render_customers_tab(self.data.generate_customers_data())
-        with tabs[3]:
-            self.layouts.render_vendors_tab(self.data.generate_vendors_data())
-        with tabs[4]:
-            self.layouts.render_payroll_tab(self.data.generate_payroll_data())
-        with tabs[5]:
-            self.layouts.render_financial_tab(self.data.generate_financial_data())
-        with tabs[6]:
-            self.layouts.render_reports_tab(self.generate_reports_data())
-        with tabs[7]:
-            self.layouts.render_analytics_tab(self.generate_analytics_data())
-        with tabs[8]:
-            self.layouts.render_documents_tab(self.generate_documents_data())
-        with tabs[9]:
-            self.layouts.render_setup_tab()
-
-    def create_sidebar(self):
-        with st.sidebar:
-            st.title("Filters")
-            st.date_input(
-                "Date Range",
-                value=(datetime.now() - timedelta(days=30), datetime.now())
-            )
-            st.selectbox(
-                "Company",
-                options=["All"] + [f"Company {i}" for i in range(1, 6)]
-            )
-            st.multiselect(
-                "Department",
-                options=["Sales", "Marketing", "Finance", "Operations", "IT"]
-            )
-            if st.button("Refresh Data"):
-                st.rerun()
 
     def generate_reports_data(self):
         reports = {
@@ -166,6 +64,106 @@ class DashboardApp:
             'pending_review': len(documents[documents['Status'] == 'Under Review']),
             'document_list': documents
         }
+
+class DashboardApp:
+    def __init__(self):
+        self.data = DashboardData()
+
+    def run(self):
+        st.set_page_config(layout="wide", page_title="NetSuite Dashboard", page_icon="📊")
+
+        # Sidebar Navigation
+        st.sidebar.title("Navigation")
+        pages = [
+            "Activities",
+            "Billing",
+            "Customers",
+            "Vendors",
+            "Payroll and HR",
+            "Financial",
+            "Reports",
+            "Analytics",
+            "Documents",
+            "Setup"
+        ]
+        selected_page = st.sidebar.radio("Go to", pages)
+
+        # Render the selected page
+        if selected_page == "Activities":
+            self.render_activities_page()
+        elif selected_page == "Billing":
+            self.render_billing_page()
+        elif selected_page == "Customers":
+            self.render_customers_page()
+        elif selected_page == "Vendors":
+            self.render_vendors_page()
+        elif selected_page == "Payroll and HR":
+            self.render_payroll_page()
+        elif selected_page == "Financial":
+            self.render_financial_page()
+        elif selected_page == "Reports":
+            self.render_reports_page()
+        elif selected_page == "Analytics":
+            self.render_analytics_page()
+        elif selected_page == "Documents":
+            self.render_documents_page()
+        elif selected_page == "Setup":
+            self.render_setup_page()
+
+    def render_activities_page(self):
+        st.title("Activities Dashboard")
+        st.write("Here you can track ongoing activities.")
+
+    def render_billing_page(self):
+        st.title("Billing Dashboard")
+        st.write("Track billing cycles and invoices.")
+
+    def render_customers_page(self):
+        st.title("Customer Dashboard")
+        st.write("View and manage customer data.")
+
+    def render_vendors_page(self):
+        st.title("Vendor Dashboard")
+        st.write("Monitor and manage vendor relationships.")
+
+    def render_payroll_page(self):
+        st.title("Payroll and HR Dashboard")
+        st.write("Manage payroll processes and HR information.")
+
+    def render_financial_page(self):
+        st.title("Financial Dashboard")
+        st.write("Analyze financial data and trends.")
+
+    def render_reports_page(self):
+        data = self.data.generate_reports_data()
+        st.title("Reports Dashboard")
+        st.write("Access detailed reports.")
+        st.table(data['reports']['Financial Reports'])
+        st.table(data['reports']['Sales Reports'])
+
+    def render_analytics_page(self):
+        data = self.data.generate_analytics_data()
+        st.title("Analytics Dashboard")
+        st.subheader("Key Performance Indicators (KPIs)")
+        for kpi, values in data['kpis'].items():
+            st.metric(label=kpi, value=values['current'], delta=values['delta'])
+
+        st.subheader("Metrics")
+        selected_metric = st.selectbox("Select Metric", options=data['available_metrics'])
+        metric_data = data['metric_data'][selected_metric]
+        st.line_chart(metric_data.set_index('date')['value'])
+
+    def render_documents_page(self):
+        data = self.data.generate_documents_data()
+        st.title("Documents Dashboard")
+        st.write(f"Total Documents: {data['total_documents']}")
+        st.write(f"Recent Uploads: {data['recent_uploads']}")
+        st.write(f"Pending Review: {data['pending_review']}")
+        st.dataframe(data['document_list'])
+
+    def render_setup_page(self):
+        st.title("Setup Dashboard")
+        st.write("Configure application settings and preferences.")
 
 if __name__ == "__main__":
     app = DashboardApp()
