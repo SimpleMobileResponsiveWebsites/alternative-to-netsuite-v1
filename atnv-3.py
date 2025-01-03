@@ -5,22 +5,56 @@ from datetime import datetime, timedelta
 
 class DashboardData:
     def generate_activities_data(self):
-        return {}
+        activities = pd.DataFrame({
+            'Activity': ['Team Meeting', 'Project Launch', 'Deadline'],
+            'Date': [datetime.now() - timedelta(days=i) for i in range(3)],
+            'Status': ['Completed', 'Scheduled', 'Upcoming']
+        })
+        return {'activities': activities}
 
     def generate_billing_data(self):
-        return {}
+        billing = pd.DataFrame({
+            'Invoice ID': [f'INV-{i:04d}' for i in range(1, 6)],
+            'Amount': np.random.uniform(1000, 5000, 5).round(2),
+            'Due Date': [datetime.now() + timedelta(days=i * 5) for i in range(5)],
+            'Status': ['Paid', 'Due', 'Overdue', 'Paid', 'Due']
+        })
+        return {'billing': billing}
 
     def generate_customers_data(self):
-        return {}
+        customers = pd.DataFrame({
+            'Customer Name': [f'Customer {i}' for i in range(1, 11)],
+            'Email': [f'customer{i}@example.com' for i in range(1, 11)],
+            'Total Spent': np.random.uniform(5000, 20000, 10).round(2),
+            'Last Purchase': [datetime.now() - timedelta(days=i * 10) for i in range(10)]
+        })
+        return {'customers': customers}
 
     def generate_vendors_data(self):
-        return {}
+        vendors = pd.DataFrame({
+            'Vendor Name': [f'Vendor {i}' for i in range(1, 6)],
+            'Contact': [f'contact{i}@vendor.com' for i in range(1, 6)],
+            'Pending Orders': np.random.randint(1, 10, 5),
+            'Last Order': [datetime.now() - timedelta(days=i * 7) for i in range(5)]
+        })
+        return {'vendors': vendors}
 
     def generate_payroll_data(self):
-        return {}
+        payroll = pd.DataFrame({
+            'Employee': [f'Employee {i}' for i in range(1, 6)],
+            'Department': np.random.choice(['HR', 'Finance', 'IT', 'Sales'], 5),
+            'Last Payroll Date': [datetime.now() - timedelta(days=i * 15) for i in range(5)],
+            'Salary': np.random.uniform(4000, 8000, 5).round(2)
+        })
+        return {'payroll': payroll}
 
     def generate_financial_data(self):
-        return {}
+        financial = pd.DataFrame({
+            'Metric': ['Revenue', 'Expenses', 'Profit', 'Cash Flow'],
+            'Amount': [120000, 80000, 40000, 30000],
+            'Trend': ['Up', 'Down', 'Up', 'Flat']
+        })
+        return {'financial': financial}
 
     def generate_reports_data(self):
         reports = {
@@ -111,28 +145,40 @@ class DashboardApp:
             self.render_setup_page()
 
     def render_activities_page(self):
+        data = self.data.generate_activities_data()
         st.title("Activities Dashboard")
         st.write("Here you can track ongoing activities.")
+        st.table(data['activities'])
 
     def render_billing_page(self):
+        data = self.data.generate_billing_data()
         st.title("Billing Dashboard")
         st.write("Track billing cycles and invoices.")
+        st.table(data['billing'])
 
     def render_customers_page(self):
+        data = self.data.generate_customers_data()
         st.title("Customer Dashboard")
         st.write("View and manage customer data.")
+        st.table(data['customers'])
 
     def render_vendors_page(self):
+        data = self.data.generate_vendors_data()
         st.title("Vendor Dashboard")
         st.write("Monitor and manage vendor relationships.")
+        st.table(data['vendors'])
 
     def render_payroll_page(self):
+        data = self.data.generate_payroll_data()
         st.title("Payroll and HR Dashboard")
         st.write("Manage payroll processes and HR information.")
+        st.table(data['payroll'])
 
     def render_financial_page(self):
+        data = self.data.generate_financial_data()
         st.title("Financial Dashboard")
         st.write("Analyze financial data and trends.")
+        st.table(data['financial'])
 
     def render_reports_page(self):
         data = self.data.generate_reports_data()
