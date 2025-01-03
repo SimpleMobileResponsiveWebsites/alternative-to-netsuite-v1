@@ -24,6 +24,15 @@ def main():
     # Page configuration
     st.set_page_config(layout="wide", page_title="NetSuite Dashboard")
     
+    # Initialize session state for cross-page data sharing
+    if 'key_metrics' not in st.session_state:
+        st.session_state.key_metrics = {
+            'revenue': 3.7,
+            'sales': 5.2,
+            'expenses': 8.1,
+            'receivables': 2.1
+        }
+    
     # Top navigation bar
     col1, col2, col3, col4 = st.columns([2, 6, 1, 1])
     with col1:
@@ -52,15 +61,16 @@ def main():
         for reminder in reminders:
             st.markdown(reminder)
         
+        # Updated Navigation Shortcut Group with page switching
         st.markdown("### Navigation Shortcut Group")
-        shortcuts = [
-            "Executive Management",
-            "Sales",
-            "Customer Hierarchy",
-            "Inventory Management"
-        ]
-        for shortcut in shortcuts:
-            st.button(shortcut)
+        if st.button("Executive Management", key="exec_mgmt"):
+            st.switch_page("pages/1_Executive_Management.py")
+        if st.button("Sales", key="sales"):
+            st.switch_page("pages/2_Sales.py")
+        if st.button("Customer Hierarchy", key="customer"):
+            st.switch_page("pages/3_Customer_Hierarchy.py")
+        if st.button("Inventory Management", key="inventory"):
+            st.switch_page("pages/4_Inventory_Management.py")
 
     # Middle section
     with middle_col:
