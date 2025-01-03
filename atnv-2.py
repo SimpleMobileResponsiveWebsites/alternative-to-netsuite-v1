@@ -26,50 +26,62 @@ class DashboardData:
 
 class DashboardLayouts:
     def render_activities_tab(self, data):
-        st.write("Activities tab content.")
+        st.title("Activities Dashboard")
+        st.write("Here you can track ongoing activities.")
+        st.write("Add charts or activity summaries as needed.")
 
     def render_billing_tab(self, data):
-        st.write("Billing tab content.")
+        st.title("Billing Dashboard")
+        st.write("Track billing cycles and invoices.")
+        st.write("Include billing data visualizations or metrics.")
 
     def render_customers_tab(self, data):
-        st.write("Customers tab content.")
+        st.title("Customer Dashboard")
+        st.write("View and manage customer data.")
+        st.write("Add customer KPIs, lists, or charts.")
 
     def render_vendors_tab(self, data):
-        st.write("Vendors tab content.")
+        st.title("Vendor Dashboard")
+        st.write("Monitor and manage vendor relationships.")
+        st.write("Include vendor performance metrics or summaries.")
 
     def render_payroll_tab(self, data):
-        st.write("Payroll and HR tab content.")
+        st.title("Payroll and HR Dashboard")
+        st.write("Manage payroll processes and HR information.")
+        st.write("Include payroll KPIs or charts.")
 
     def render_financial_tab(self, data):
-        st.write("Financial tab content.")
+        st.title("Financial Dashboard")
+        st.write("Analyze financial data and trends.")
+        st.write("Include financial KPIs and charts.")
 
     def render_reports_tab(self, data):
-        st.write("Reports tab content.")
+        st.title("Reports Dashboard")
+        st.write("Access detailed reports.")
+        st.table(data['reports']['Financial Reports'])
+        st.table(data['reports']['Sales Reports'])
 
     def render_analytics_tab(self, data):
-        st.title("Analytics Overview")
+        st.title("Analytics Dashboard")
         st.subheader("Key Performance Indicators (KPIs)")
         for kpi, values in data['kpis'].items():
             st.metric(label=kpi, value=values['current'], delta=values['delta'])
 
         st.subheader("Metrics")
         selected_metric = st.selectbox("Select Metric", options=data['available_metrics'])
-
-        # Ensure the DataFrame is structured correctly
         metric_data = data['metric_data'][selected_metric]
-        if not all(col in metric_data.columns for col in ['date', 'value']):
-            st.error(f"Data for {selected_metric} is not in the expected format.")
-            return
-
-        # Rename columns to ensure compatibility with line_chart
-        metric_data = metric_data.rename(columns={'date': 'x', 'value': 'y'})
-        st.line_chart(metric_data.set_index('x')['y'])
+        st.line_chart(metric_data.set_index('date')['value'])
 
     def render_documents_tab(self, data):
-        st.write("Documents tab content.")
+        st.title("Documents Dashboard")
+        st.write(f"Total Documents: {data['total_documents']}")
+        st.write(f"Recent Uploads: {data['recent_uploads']}")
+        st.write(f"Pending Review: {data['pending_review']}")
+        st.dataframe(data['document_list'])
 
     def render_setup_tab(self):
-        st.write("Setup tab content.")
+        st.title("Setup Dashboard")
+        st.write("Configure application settings and preferences.")
 
 class DashboardApp:
     def __init__(self):
