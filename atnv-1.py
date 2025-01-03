@@ -22,7 +22,6 @@ def create_gauge_chart():
 
 def exec_management_view():
     st.title("Executive Management Dashboard")
-    # Add executive management content here
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(label="Total Revenue", value="$15.2M", delta="+12%")
@@ -35,7 +34,6 @@ def exec_management_view():
 
 def sales_view():
     st.title("Sales Dashboard")
-    # Add sales content here
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(label="Total Sales", value="$5.2M", delta="+15%")
@@ -48,17 +46,15 @@ def sales_view():
 
 def customer_hierarchy_view():
     st.title("Customer Hierarchy")
-    # Add customer hierarchy content here
     st.subheader("Customer Search")
     col1, col2 = st.columns([3, 1])
     with col1:
         st.text_input("Search Customers", placeholder="Enter customer name or ID")
     with col2:
-        st.button("Search")
+        st.button("Search", key="search_customers")
 
 def inventory_management_view():
     st.title("Inventory Management")
-    # Add inventory management content here
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric(label="Total SKUs", value="1,234", delta="+12")
@@ -86,9 +82,9 @@ def main():
                 "Financial", "Reports", "Analytics", "Documents", "Setup"]
         st.selectbox("Navigation", tabs, label_visibility="collapsed")
     with col3:
-        st.button("Help")
+        st.button("Help", key="help_button")
     with col4:
-        st.button("Feedback")
+        st.button("Feedback", key="feedback_button")
 
     # Main content area
     left_col, middle_col, right_col = st.columns([1, 2, 1])
@@ -105,20 +101,20 @@ def main():
         for reminder in reminders:
             st.markdown(reminder)
         
-        # Navigation Shortcut Group with state management
+        # Navigation Shortcut Group
         st.markdown("### Navigation Shortcut Group")
-        if st.button("Executive Management", key="exec_mgmt"):
+        if st.button("Executive Management", key="nav_exec"):
             st.session_state.page = 'executive'
-            st.experimental_rerun()
-        if st.button("Sales", key="sales"):
+            st.rerun()
+        if st.button("Sales", key="nav_sales"):
             st.session_state.page = 'sales'
-            st.experimental_rerun()
-        if st.button("Customer Hierarchy", key="customer"):
+            st.rerun()
+        if st.button("Customer Hierarchy", key="nav_customer"):
             st.session_state.page = 'customer'
-            st.experimental_rerun()
-        if st.button("Inventory Management", key="inventory"):
+            st.rerun()
+        if st.button("Inventory Management", key="nav_inventory"):
             st.session_state.page = 'inventory'
-            st.experimental_rerun()
+            st.rerun()
 
     # Content area - conditionally render based on navigation state
     if st.session_state.page == 'executive':
@@ -137,7 +133,7 @@ def main():
             tiles = ["Balance Sheet", "Trial Balance", "Income Statement", "Budget vs Actual"]
             for i, tile in enumerate(tiles):
                 with tile_cols[i]:
-                    st.button(tile)
+                    st.button(tile, key=f"tile_{i}")
             
             st.markdown("### Key Performance Indicators")
             kpi_cols = st.columns(4)
